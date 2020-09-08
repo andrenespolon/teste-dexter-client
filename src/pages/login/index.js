@@ -46,7 +46,6 @@ export default class Login extends React.Component {
 
 	onChangeEmail = (e) => {
 		this.setState({ email: e.target.value });
-		// console.log(this.state.email);
 	};
 
 	onKeyPressDownInput = (e) => {
@@ -61,7 +60,6 @@ export default class Login extends React.Component {
 	onChangePassword = (e) => {
 		const validPassword = e.target.value;
 		this.setState({ password: validPassword });
-		// console.log(this.state.password);
 	};
 
 	emailIsValid = (email) => {
@@ -171,7 +169,7 @@ export default class Login extends React.Component {
 			}
 		} catch (error) {
 			// console.log(error);
-			return this.props.history.push('/not-found');
+			return (window.location = '/not-found');
 		}
 	};
 
@@ -187,7 +185,7 @@ export default class Login extends React.Component {
 		this.setState({
 			loading: false,
 		});
-		return this.props.history.push('/foods');
+		return (window.location = '/foods');
 	};
 
 	render() {

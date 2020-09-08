@@ -10,10 +10,10 @@ export default class Header extends React.Component {
 	};
 
 	componentDidMount = () => {
-		const { url } = this.props.match;
-		const path = url.split('/');
+		const { path } = this.props;
+		const url = path.split('/');
 
-		switch (path[1]) {
+		switch (url[1]) {
 			case 'foods':
 				this.setState({ selectedUrl: 1 });
 				break;
