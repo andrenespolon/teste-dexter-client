@@ -20,7 +20,7 @@ import {
 import Input from '../../components/input';
 import Button from '../../components/button';
 
-import { apiUrl } from '../../services/api';
+import { Parse } from '../../services/parseApi';
 
 import color from '../../configs/colorTheme';
 
@@ -118,58 +118,55 @@ export default class Login extends React.Component {
 
 	loginSession = async () => {
 		const { email, password } = this.state;
-		const emailEncoded = encodeURIComponent(email);
-		const passwordEncoded = encodeURIComponent(password);
-
-		const params = `username=${emailEncoded}&password=${passwordEncoded}`;
-
 		try {
-			const response = await apiUrl.get(`/login?${params}`);
-			if (response.status === 200) {
-				const { objectId, sessionToken } = response.data;
-				return this.loggingIn(objectId, sessionToken);
-			}
+			await Parse.User.logIn(email, password);
+			return (window.location = '/foods');
 		} catch (error) {
-			// console.log(error);
-			return this.setState({
-				loading: false,
-				errorLogin: true,
-				msgErrorLogin: 'E-mail ou senha incorreto!',
-			});
+			return this.errorHandling(error.code);
 		}
 	};
 
 	createAccount = async () => {
 		const { email, password } = this.state;
-		const searchEncoded = encodeURIComponent(`where[username]`);
-		const emailEncoded = encodeURIComponent(email);
-
-		const params = `${searchEncoded}=${emailEncoded}`;
-
+		const query = new Parse.Query(Parse.User);
+		query.equalTo('username', email);
 		try {
-			const response = await apiUrl.get(`/users?${params}`);
-			const { results } = response.data;
+			const results = await query.find();
 			if (results.length > 0) {
+				return this.errorHandling(999);
+			}
+			const user = new Parse.User();
+			user.set('username', email);
+			user.set('password', password);
+			await user.signUp();
+			return (window.location = '/foods');
+		} catch (error) {
+			return this.errorHandling(error.code);
+		}
+	};
+
+	errorHandling = (code) => {
+		switch (code) {
+			case 101:
+				return this.setState({
+					loading: false,
+					errorLogin: true,
+					msgErrorLogin: 'E-mail ou senha inválido!',
+				});
+
+			case 999:
 				return this.setState({
 					loading: false,
 					errorLogin: true,
 					msgErrorLogin: 'Este e-mail já está cadastrado!',
 				});
-			} else {
-				const data = {
-					username: email,
-					password,
-				};
-				const createUser = await apiUrl.post('/users', data);
-				// console.log(createUser);
-				if (createUser.status === 201) {
-					const { objectId, sessionToken } = createUser.data;
-					return this.loggingIn(objectId, sessionToken);
-				}
-			}
-		} catch (error) {
-			// console.log(error);
-			return (window.location = '/not-found');
+
+			default:
+				return this.setState({
+					loading: false,
+					errorLogin: true,
+					msgErrorLogin: 'Ops! Algo deu errado.',
+				});
 		}
 	};
 

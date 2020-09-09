@@ -5,7 +5,7 @@ import GridSection from '../../components/grid-section';
 import Skeleton from '../../components/skeleton';
 import { Section } from './styles';
 
-import { apiUrl } from '../../services/api';
+import { Parse } from '../../services/parseApi';
 
 export default class Places extends React.Component {
 	state = {
@@ -15,9 +15,21 @@ export default class Places extends React.Component {
 
 	componentDidMount = async () => {
 		try {
-			const response = await apiUrl.get('/classes/getAllPlaces');
-			const { results } = response.data;
-			return this.setState({ places: results, loading: false });
+			const getAllPlaces = Parse.Object.extend('getAllPlaces');
+			const query = new Parse.Query(getAllPlaces);
+			query.select('name', 'link');
+			const results = await query.find();
+
+			let resultPlaces = [];
+
+			for (let i = 0; i < results.length; i++) {
+				let object = results[i];
+				resultPlaces.push({
+					name: object.get('name'),
+					link: object.get('link'),
+				});
+			}
+			return this.setState({ places: resultPlaces, loading: false });
 		} catch (error) {
 			console.log(error);
 		}

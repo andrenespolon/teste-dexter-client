@@ -12,7 +12,7 @@ export default class NotFound extends React.Component {
 					<Button
 						styled
 						label="Voltar"
-						onClick={() => (window.location = '/foods')}
+						onClick={() => (window.location = '/')}
 					/>
 				</div>
 			</Section>

@@ -5,7 +5,7 @@ import GridSection from '../../components/grid-section';
 import Skeleton from '../../components/skeleton';
 import { Section } from './styles';
 
-import { apiUrl } from '../../services/api';
+import { Parse } from '../../services/parseApi';
 
 export default class Peoples extends React.Component {
 	state = {
@@ -15,9 +15,21 @@ export default class Peoples extends React.Component {
 
 	componentDidMount = async () => {
 		try {
-			const response = await apiUrl.get('/classes/getAllPeople');
-			const { results } = response.data;
-			return this.setState({ people: results, loading: false });
+			const getAllPeople = Parse.Object.extend('getAllPeople');
+			const query = new Parse.Query(getAllPeople);
+			query.select('name', 'link');
+			const results = await query.find();
+
+			let resultPeople = [];
+
+			for (let i = 0; i < results.length; i++) {
+				let object = results[i];
+				resultPeople.push({
+					name: object.get('name'),
+					link: object.get('link'),
+				});
+			}
+			return this.setState({ people: resultPeople, loading: false });
 		} catch (error) {
 			console.log(error);
 		}
